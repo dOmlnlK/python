@@ -1,0 +1,156 @@
+{% extends "index.html" %}
+
+{% block css %}
+    <link href="/static/plugins/dropzone/dropzone.css" rel="stylesheet" type="text/css">
+
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <h3>华广IT培训|学员登记信息</h3>
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">学员信息填写</h3>
+      </div>
+      <div class="panel-body">
+          <form class="form" method="post" onsubmit="return BeforeSummitDisabledFalse(this)">
+          {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group col-lg-6">
+                    <label  class="control-label col-lg-2">{{ field.label }}</label>
+                    <div class="col-lg-10">
+                        {{ field }}<span style="color: red">{{ field.errors.0 }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+
+                <div class="form-group col-lg-6">
+                    <label  class="control-label col-lg-2">学费</label>
+                    <div class="col-lg-10">
+                        {{ price }}
+                    </div>
+                </div>
+
+                <div class="form-group col-lg-6">
+                    <label  class="control-label col-lg-2">所报班级</label>
+                    <div class="col-lg-10">
+                        {{ stu_enrollment_obj.class_grade }}
+                    </div>
+                </div>
+
+
+
+                <hr>
+                <pre style="height: 400px">{{ stu_enrollment_obj.class_grade.contract_template.content }}</pre>
+                <p><input type="checkbox" name="contract_agreed" id="contract_agreed">已阅读合同内容，同意合同内一切协议。</p>
+                <input type="submit" class="btn btn-info" value="提交">
+          </form>
+
+            <label>已经上传的文件：</label>
+            <ul id="uploaded_files">
+                {% for file in upload_files %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+
+            <form id="myDropZone"  class="dropzone" action="{% url "enrollment_upload" stu_enrollment_id %}">
+              <div class="fallback">
+                <input name="file" type="file" multiple />
+              </div>
+            </form>
+
+
+      </div>
+
+
+    </div>
+
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block js %}
+
+    <script src="/static/plugins/dropzone/dropzone.js"></script>
+
+
+
+
+    <script>
+
+        function BeforeSummitDisabledFalse(ele) {
+            var select_eles =document.getElementsByTagName("select")
+            for (var i=0;i<select_eles.length;i++){
+                select_eles[i].removeAttribute("disabled")
+            }
+
+            var input_eles =document.getElementsByTagName("input")
+            for (var i=0;i<input_eles.length;i++){
+                input_eles[i].removeAttribute("disabled")
+            }
+
+            if ($("#uploaded_files").children().length == 0){
+                alert("请上传相关证件文件！")
+                return false
+            }
+
+            if (!$("#contract_agreed").prop("checked")){
+                alert("必须勾选同意合同才能提交！")
+                return false
+            }
+
+        }
+
+
+        Dropzone.options.myDropZone = {
+          paramName: "file", // The name that will be used to transfer the file
+          maxFilesize: 2, // 最大上传文件MB
+          maxFiles:2,     //一次性最多上传两个
+          parallelUploads:1,
+          accept: function(file, done) {
+            if (file.name == "justinbieber.jpg") {
+              done("Naha, you don't.");
+            }
+            else { done(); }
+          }
+        };
+
+
+        Dropzone.autoDiscover = false;    //您必须在$（document）.ready之前放置autoDiscover选项
+        $(function() {
+          // Now that the DOM is fully loaded, create the dropzone, and setup the
+          // event listeners
+          // Prevent Dropzone from auto discovering this element:
+
+          Dropzone.options.myDropZone = false;    //避免重新创建
+          var myDropzone = new Dropzone("#myDropZone");
+
+          myDropzone.on("success", function(file,response) {
+            /* Maybe display some more file information on your page */
+             console.log("completet", file, response);
+             var response = JSON.parse(response);
+             if (!response.status){
+                 alert(response.err_msg);
+             }else {
+                 $("#uploaded_files").append("<li>"+ file.name +"</li>");
+
+             }
+
+          });
+        })
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "bestadmin/index.html" %}
+
+{% block content %}
+    <h2 class="page-header">BestAdmin</h2>
+
+    <div>
+        {% for app_name,models in site.enabled_admins.items %}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>{{ app_name }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for model_name in models %}
+                    <tr>
+                        <td><a href="{% url "model_detail" app_name model_name %}">{{ model_name }}</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </div>
+{% endblock %}

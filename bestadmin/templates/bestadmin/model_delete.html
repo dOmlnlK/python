@@ -1,0 +1,42 @@
+{{% extends "bestadmin/index.html" %}
+{% load bestadmin_tags %}
+{% block content %}
+    <div>
+        <h2 class="page-header">删除</h2>
+
+        <ol class="breadcrumb">
+            <li><a href="/bestadmin/">Home</a></li>
+            <li><a href="/bestadmin/{{ app_name }}">{{ app_name }}</a></li>
+             <li><a href="/bestadmin/{{ app_name }}/{{ model_name }}">{{ model_name }}</a></li>
+            <li class="active">delete {{ objs }}</li>
+        </ol>
+
+        <h4 class="page-header alert-danger">注意：删除{{ objs }}与之相关的的数据也将被删除！</h4>
+
+        {% for obj in objs %}
+        {% display_related_objs obj %}
+        {% endfor %}
+
+
+
+        <form method="post">{% csrf_token %}
+            <input type="hidden" name="selected_ids" value='{{ selected_ids }}'>
+            <button type="submit" class="btn btn-danger">确定删除</button>
+            {% if objs_len == 1 %}
+                <a class="btn bg-info" href="/bestadmin/{{ app_name }}/{{ model_name }}/{{ obj_id }}/change/">返回修改</a>
+
+                {% else %}
+                <a class="btn bg-info" href="/bestadmin/{{ app_name }}/{{ model_name }}/">返回</a>
+            {% endif %}
+
+
+        </form>
+
+
+
+   </div>
+
+
+
+
+{% endblock %}

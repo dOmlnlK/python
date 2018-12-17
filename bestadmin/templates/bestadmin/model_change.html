@@ -1,0 +1,121 @@
+{{% extends "bestadmin/index.html" %}
+{% load bestadmin_tags %}
+{% block content %}
+    <div>
+        <h2 class="page-header">{% get_model_name admin_class %}</h2>
+
+         <ol class="breadcrumb">
+            <li><a href="/bestadmin/">Home</a></li>
+            <li><a href="/bestadmin/{{ app_name }}">{{ app_name }}</a></li>
+             <li><a href="/bestadmin/{{ app_name }}/{{ model_name }}">{{ model_name }}</a></li>
+            <li class="active">change {{ obj }}</li>
+        </ol>
+
+        <h4 class="page-header">修改:{{ form_obj.instance }}</h4>
+
+        <form class="form-horizontal" method="post" onsubmit="SelectAllBeforeSumit(this)">
+            {% csrf_token %}
+            {% for field in form_obj %}
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">{{ field.label }}</label>
+                    <div class="col-sm-10">
+
+                        {% if field.name in admin_class.filter_horizontal %}
+
+                            <div class="col-lg-5">
+                                <input class="form-control" placeholder="输入搜索内容" oninput="FuzzSearch(this)">
+                                <select multiple class="form-control" id="{{ field.name }}_unselected">
+                                    {% get_available_m2m_data admin_class field.name form_obj %}
+                                </select>
+                                <p><a onclick="MoveAllOption('{{ field.name }}_unselected','{{ field.name }}_selected')">Choose All</a></p>
+                            </div>
+
+                            <div class="col-lg-5">
+                                <select multiple class="form-control" tag="selected" id="{{ field.name }}_selected" name="{{ field.name }}">
+                                    {% get_selected_m2m_data admin_class field.name form_obj %}
+                                </select>
+                                <p><a onclick="MoveAllOption('{{ field.name }}_selected','{{ field.name }}_unselected')">Remove All</a></p>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        <span style="color: red">{{ field.errors.0 }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% for field in admin_class.readonly_fields %}
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">{{ field }}</label>
+                    <div class="col-sm-10">
+                        {% get_readonly_field_val form_obj field %}
+
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="col-lg-offset-2 " style="float: left">
+                <a  class="btn btn-danger" href="{% url 'model_delete' app_name model_name form_obj.instance.id %}">删除</a>
+            </div>
+
+            <div class="col-lg-offset-11 ">
+                <button type="submit" class="btn btn-info ">提交</button>
+            </div>
+        </form>
+    </div>
+
+
+
+{% endblock %}
+
+{% block js %}
+
+
+      <script>
+
+        function MoveOption(that, target_id) {
+            var new_target_id = $(that).parent().attr("id");
+
+            var option = "<option value='" + $(that).val() + "'  ondblclick=MoveOption(this,'" + new_target_id + "') >" + $(that).text() + "</option>";
+
+            $(that).remove();
+            $("#"+target_id).append(option)
+        }
+
+
+      function SelectAllBeforeSumit(that) {
+
+          $("select[tag] option").prop("selected",true)
+
+
+      }
+
+
+        // 移动所有选项
+      function MoveAllOption(from_id,to_id) {
+
+          $("#"+from_id).children().each(function () {
+                MoveOption(this,to_id)
+          })
+      }
+
+        // 模糊查询
+      function FuzzSearch(ele) {
+          var search_text = $(ele).val().toUpperCase();
+          $(ele).next().children().each(function () {
+              if ($(this).text().toUpperCase().search(search_text) != -1){
+                  $(this).show()
+              } else {
+                  $(this).hide()
+              }
+          })
+
+      }
+
+
+      </script>
+
+
+
+{% endblock %}

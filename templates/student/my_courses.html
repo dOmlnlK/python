@@ -1,0 +1,53 @@
+{% extends "index.html" %}
+
+
+{% block content %}
+    <h2 class="page-header">我的课程</h2>
+
+    <div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>课程</th>
+                    <th>课程类型</th>
+                    <th>开课日期</th>
+                    <th>课程周期(月)</th>
+                    <th>上课节数</th>
+                    <th>成绩</th>
+                    <th>成绩排名</th>
+                    <th>作业管理</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+                    <p style="font-size: 20px">课程列表</p>
+                    <hr>
+                {% for class in class_list %}
+                    <tr>
+                        <td>{{ class.course.name }}</td>
+                        <td>{{ class.get_class_type_display }}</td>
+                        <td>{{ class.start_date }}</td>
+                        <td>{{ class.course.period }}</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><a href="#">成绩排名</a></td>
+                        <td><a href="#">详细</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+
+
+
+    </div>
+
+
+
+
+
+{% endblock %}

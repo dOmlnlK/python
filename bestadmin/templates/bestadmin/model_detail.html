@@ -1,0 +1,200 @@
+{% extends "bestadmin/index.html" %}
+{% load bestadmin_tags %}
+{% block content %}
+    <div>
+        <h2 class="page-header">Detail</h2>
+
+
+        <ol class="breadcrumb">
+            <li><a href="/bestadmin/">Home</a></li>
+            <li><a href="/bestadmin/{{ app_name }}">{{ app_name }}</a></li>
+            <li class="active">{{ model_name }}</li>
+        </ol>
+
+        <div>
+            <a  class="btn btn-default" href="/bestadmin/crm/customerinfos/add/">添加</a>
+
+            <form>
+                <input type="search" name="_q" value="{{ search_val }}"
+                       placeholder="{% for s in admin_class.search_fields %}{{ s }},{% endfor %}">
+
+                <input type="submit" value="搜索" class="btn btn-default">
+
+            {% if filter_condition %}
+                {% for k,v in filter_condition.items %}
+                    <input type="hidden" name="{{ k }}" value="{{ v }}" >
+                {% endfor %}
+            {% endif %}
+
+            </form>
+        </div>
+
+
+
+        <div>
+            {% if admin_class.list_filter %}
+                <form>
+                    {% for filter_column in admin_class.list_filter %}
+                        <span>{{ filter_column }}:</span>
+                        {% build_filter_ele filter_column admin_class %}
+                    {% endfor %}
+                    <input type="hidden" name="_o" value="{% get_current_orderby_index current_orderby_column %}">
+                    <input type="submit" value="过滤" class="btn btn-success">
+                </form>
+            {% endif %}
+
+        </div>
+
+
+        <form  method="post" onsubmit="return CheckAction(this)">
+        {% csrf_token %}
+            <div class="row">
+                <div class="col-lg-3">
+                    <select class="form-control" name="action">
+                        <option value="">------------------------</option>
+                        {% for action in admin_class.actions %}
+                            <option value="{{ action }}">{{ action }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <input type="submit" value="GO" class="btn btn-default">
+                </div>
+            </div>
+
+        </form>
+
+
+        <div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" onclick="SelectAllObjs(this)"></th>
+                    {% if admin_class.list_display %}
+                        {% for column_name in admin_class.list_display %}
+
+                            <th>
+                                <a href="?_o={% get_orderby_index current_orderby_column forloop.counter0 column_name%}{% render_filter_args admin_class %}">
+                                    {{ column_name }}
+                                    {% render_orderby_arrow current_orderby_column column_name%}
+                                </a>
+                            </th>
+                        {% endfor %}
+                    {% else %}
+                        <th>
+                                    {% get_model_name admin_class %}
+                        </th>
+                    {% endif %}
+
+                </tr>
+                </thead>
+
+                <tbody>
+                {% if admin_class.list_display %}
+                    {% for obj in obj_list %}
+
+                        <tr>
+                            <td><input type="checkbox" row-select="true" value="{{ obj.id }}"></td>
+                            {% build_tb_row obj admin_class %}
+                        </tr>
+                    {% endfor %}
+
+                {% else %}
+
+                    {% for obj in obj_list %}
+                        <tr>
+                            <td><input type="checkbox" row-select="true" value="{{ obj.id }}"></td>
+                            <td><a href="{% url 'model_change' app_name model_name obj.id %}">{{ obj }}</a></td>
+                        </tr>
+                    {% endfor %}
+
+                {% endif %}
+                </tbody>
+
+            </table>
+        </div>
+
+
+        <div class="pagination">
+
+                {% render_paginator obj_list admin_class current_orderby_column %}
+
+        </div>
+
+
+    </div>
+
+
+
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        function SelectAllObjs(ele){
+            if ($(ele).prop("checked")){
+                $("input[row-select]").prop("checked",true)
+            } else {
+                $("input[row-select]").prop("checked",false)
+            }
+
+
+        }
+
+
+    function CheckAction(ele) {
+        if (!$("select[name=action]").val()){
+            alert("no action selected!")
+            return false
+        }
+
+        var has_obj = false
+        $("input[row-select]").each(function () {
+            if($(this).prop("checked")){
+                 has_obj = true
+
+            }
+        })
+
+
+        if (!has_obj){
+            alert("no object selected!")
+            return false
+        }
+
+
+        else {
+            console.log(111)
+            var selected_ids = [];
+            $("input[row-select]").each(function () {
+                if ($(this).prop("checked")){
+                    selected_ids.push($(this).val())
+                }
+
+            })
+
+            var input_ele = document.createElement("input")
+            $(input_ele).attr("type","hidden")
+            $(input_ele).prop("name","selected_ids")
+            $(input_ele).attr("value",JSON.stringify(selected_ids))
+
+            ele.append(input_ele)
+
+            console.log(JSON.stringify(selected_ids))
+            console.log(input_ele)
+
+
+
+        }
+    }
+
+
+
+
+    </script>
+
+
+
+
+
+{% endblock %}

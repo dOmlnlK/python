@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h2 class="page-header">学员报名|信息审核</h2>
+
+    <div>
+    <form class="form" method="post" >
+          {% csrf_token %}
+            {% for field in enrollment_form %}
+                <div class="form-group col-lg-6">
+                    <label  class="control-label col-lg-2">{{ field.label }}</label>
+                    <div class="col-lg-10">
+                        {{ field }}<span style="color: red">{{ field.errors.0 }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+    </form>
+    </div>
+
+    <hr>
+
+    <div>
+    <form class="form" method="post" onsubmit="return BeforeSummitDisabledFalse(this)">
+          {% csrf_token %}
+            {% for field in audit_form %}
+                <div class="form-group col-lg-6">
+                    <label  class="control-label col-lg-2">{{ field.label }}</label>
+                    <div class="col-lg-10">
+                        {{ field }}<span style="color: red">{{ field.errors.0 }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        <input type="submit" class="pull-right btn btn-success" value="审核通过">
+    </form>
+    </div>
+
+
+
+
+
+{% endblock %}
+
+{% block js %}
+<script>
+
+function BeforeSummitDisabledFalse(ele) {
+    $("#id_contract_argeed").removeAttr("disabled")
+
+    if (!$("#id_contract_approved").prop("checked")){
+        alert("请先勾选Contract approved！")
+        return false
+    }
+}
+
+
+
+
+</script>
+
+
+
+
+{% endblock %}
